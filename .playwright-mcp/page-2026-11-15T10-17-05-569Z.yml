@@ -1,0 +1,56 @@
+- generic [active] [ref=f1e1]:
+  - generic [ref=f1e2]:
+    - generic [ref=f1e3]: loading...
+    - generic [ref=f1e6]:
+      - tablist:
+        - tab [selected]
+        - tab
+        - tab
+        - tab
+        - tab
+        - tab
+        - tab
+        - tab
+        - tab
+        - tab
+        - tab
+        - tab
+        - tab
+        - tab
+        - tab
+        - tab
+        - tab
+        - tab
+        - tab
+        - tab
+        - tab
+        - tab
+        - tab
+        - tab
+        - tab
+      - tabpanel [ref=f1e7]
+      - tabpanel
+      - tabpanel
+      - tabpanel
+      - tabpanel
+      - tabpanel
+      - tabpanel
+      - tabpanel
+      - tabpanel
+      - tabpanel
+      - tabpanel
+      - tabpanel
+      - tabpanel
+      - tabpanel
+      - tabpanel
+      - tabpanel
+      - tabpanel
+      - tabpanel
+      - tabpanel
+      - tabpanel
+      - tabpanel
+      - tabpanel
+      - tabpanel
+      - tabpanel
+      - tabpanel
+  - alert [ref=f1e10]

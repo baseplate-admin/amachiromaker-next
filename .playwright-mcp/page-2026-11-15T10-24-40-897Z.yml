@@ -1,0 +1,57 @@
+- generic [active] [ref=f2e1]:
+  - generic [ref=f2e2]:
+    - generic [ref=f2e3]: loading...
+    - generic [ref=f2e6]:
+      - tablist:
+        - tab [selected]
+        - tab
+        - tab
+        - tab
+        - tab
+        - tab
+        - tab
+        - tab
+        - tab
+        - tab
+        - tab
+        - tab
+        - tab
+        - tab
+        - tab
+        - tab
+        - tab
+        - tab
+        - tab
+        - tab
+        - tab
+        - tab
+        - tab
+        - tab
+        - tab
+      - tabpanel [ref=f2e7]
+      - tabpanel
+      - tabpanel
+      - tabpanel
+      - tabpanel
+      - tabpanel
+      - tabpanel
+      - tabpanel
+      - tabpanel
+      - tabpanel
+      - tabpanel
+      - tabpanel
+      - tabpanel
+      - tabpanel
+      - tabpanel
+      - tabpanel
+      - tabpanel
+      - tabpanel
+      - tabpanel
+      - tabpanel
+      - tabpanel
+      - tabpanel
+      - tabpanel
+      - tabpanel
+      - tabpanel
+  - button "Open Next.js Dev Tools" [ref=f2e15] [cursor=pointer]
+  - alert [ref=f2e19]
