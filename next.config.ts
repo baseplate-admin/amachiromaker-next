@@ -5,6 +5,7 @@ const nextConfig: NextConfig = {
     cacheComponents: true,
     partialPrefetching: true,
     productionBrowserSourceMaps: true,
+    reactCompiler: true,
     output: 'standalone',
     turbopack: {
         rules: {

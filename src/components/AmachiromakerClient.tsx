@@ -1,18 +1,14 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import NextImage from 'next/image';
+import { useEffect, useMemo, useState } from 'react';
 import { Tab, Tabs, TabList, TabPanel } from 'react-tabs';
 import mergeImages from 'merge-images';
-import { Psd } from 'ag-psd';
+import type { Layer as PsdLayer, Psd } from 'ag-psd';
 import { saveAs } from 'file-saver';
 import { useWindowDimensions } from '../hooks';
-import type { Layer, LayerImage } from '../types';
-import {
-    asLayerImages,
-    asLayers,
-    getDefaultCombination,
-    getOrderedLayers,
-} from '../lib/data';
+import type { LayerImage } from '../types';
+import { asLayerImages, asLayers, getDefaultCombination } from '../lib/data';
 
 export default function AmachiromakerClient({
     initialLayerComb,
@@ -24,61 +20,41 @@ export default function AmachiromakerClient({
     const [layerComb, setLayerComb] = useState<LayerImage[]>(() =>
         asLayerImages(initialLayerComb),
     );
-    const [orderedLayers, setOrderedLayers] = useState<Layer[]>(() =>
-        asLayers(initialOrderedLayers),
+    const orderedLayers = useMemo(
+        () => asLayers(initialOrderedLayers),
+        [initialOrderedLayers],
     );
     const [outputImage, setOutputImage] = useState<string | undefined>();
-    const [outputImageDimension, setOutputImageDimension] = useState<number>(0);
-    const [itemImageDimension, setItemImageDimension] = useState<number>(0);
-    const [colorImageDimension, setColorImageDimension] = useState<number>(0);
-    const [tabImageDimension, setTabImageDimension] = useState<number>(0);
     const { width, height } = useWindowDimensions();
+
+    const outputImageDimension = useMemo(() => {
+        const maxWidth = 600;
+        const minWidth = 300;
+        const calculatedWidth = width > height ? width * 0.3 : width * 0.5;
+        return Math.max(minWidth, Math.min(maxWidth, calculatedWidth));
+    }, [width, height]);
+
+    const itemImageDimension = useMemo(() => {
+        const calculatedWidth = width > height ? width * 0.1 : width * 0.167;
+        return Math.min(160, calculatedWidth);
+    }, [width, height]);
+
+    const colorImageDimension = useMemo(() => {
+        const calculatedWidth = width > height ? width * 0.05 : width * 0.083;
+        return Math.min(60, calculatedWidth);
+    }, [width, height]);
+
+    const tabImageDimension = colorImageDimension;
 
     useEffect(() => {
         const savedComb = JSON.parse(
             localStorage.getItem('layerComb') || 'null',
         );
 
-        if (!savedComb) {
-            setLayerComb(getDefaultCombination());
-        } else {
-            setLayerComb(asLayerImages(savedComb));
-        }
-
-        setOrderedLayers(getOrderedLayers());
+        // Restore the persisted combination after hydration.
+        // eslint-disable-next-line react-hooks/set-state-in-effect
+        setLayerComb(savedComb ? asLayerImages(savedComb) : getDefaultCombination());
     }, []);
-
-    useEffect(() => {
-        const getOutputImageDimension = () => {
-            const maxWidth = 600;
-            const minWidth = 300;
-            const calculatedWidth = width > height ? width * 0.3 : width * 0.5;
-            const finalWidth = Math.min(maxWidth, calculatedWidth);
-            return finalWidth < minWidth ? minWidth : finalWidth;
-        };
-        const getItemImageDimension = () => {
-            const maxWidth = 160;
-            const calculatedWidth =
-                width > height ? width * 0.1 : width * 0.167;
-            const finalWidth = Math.min(maxWidth, calculatedWidth);
-            return finalWidth;
-        };
-        const getColorImageDimension = () => {
-            const maxWidth = 60;
-            const calculatedWidth =
-                width > height ? width * 0.05 : width * 0.083;
-            const finalWidth = Math.min(maxWidth, calculatedWidth);
-            return finalWidth;
-        };
-        const getTabImageDimension = () => {
-            return getColorImageDimension();
-        };
-
-        setOutputImageDimension(getOutputImageDimension());
-        setItemImageDimension(getItemImageDimension());
-        setColorImageDimension(getColorImageDimension());
-        setTabImageDimension(getTabImageDimension());
-    }, [width, height]);
 
     const handleChangeItem = (
         layerIdx: number,
@@ -131,13 +107,16 @@ export default function AmachiromakerClient({
                     name: orderedLayers?.[idx].pNm,
                 }))
                 .filter((i) => i.url)
-                .map(async (layer, idx) => {
-                    const drawImg = (ctx: any, url: string) => {
-                        return new Promise((resolve) => {
+                .map(async (layer): Promise<PsdLayer> => {
+                    const drawImg = (
+                        ctx: OffscreenCanvasRenderingContext2D | null,
+                        url: string,
+                    ) => {
+                        return new Promise<void>((resolve) => {
                             const image = new Image();
                             image.onload = function () {
-                                ctx.drawImage(image, 0, 0);
-                                resolve('resolved');
+                                ctx?.drawImage(image, 0, 0);
+                                resolve();
                             };
                             image.src = `${url}`;
                         });
@@ -152,7 +131,7 @@ export default function AmachiromakerClient({
                         blendMode: 'normal',
                         opacity: 1,
                         name: layer.name,
-                        canvas: canvas2,
+                        canvas: canvas2 as unknown as HTMLCanvasElement,
                     };
                 }),
         );
@@ -163,7 +142,7 @@ export default function AmachiromakerClient({
             colorMode: 3,
             channels: 3,
             bitsPerChannel: 8,
-            children: psdLayers as any,
+            children: psdLayers,
         };
 
         const data = agPsd.writePsd(psdData);
@@ -202,11 +181,12 @@ export default function AmachiromakerClient({
             style={{ flexDirection: width > height ? 'row' : 'column' }}
         >
             <div className="m-2 flex flex-col items-center text-center">
-                {isOutputReady ? (
+                {isOutputReady && outputImage ? (
                     <>
-                        <img
+                        <NextImage
                             className="rounded-2xl border border-solid border-[#555]"
                             width={outputImageDimension}
+                            height={outputImageDimension}
                             src={outputImage}
                             title="Output Image"
                             alt="Output"
@@ -279,9 +259,10 @@ export default function AmachiromakerClient({
                     <TabList>
                         {orderedLayers?.map((i) => (
                             <Tab key={i.pId}>
-                                <img
+                                <NextImage
                                     className="rounded-lg"
                                     width={tabImageDimension}
+                                    height={tabImageDimension}
                                     src={`${i.thumbUrl}`}
                                     alt=""
                                 />
@@ -293,7 +274,7 @@ export default function AmachiromakerClient({
                             <div className="flex flex-col items-start text-left">
                                 <div className="min-w-full rounded-2xl border border-dashed border-[rgb(114,57,57)]">
                                     {!!i.isRmv && (
-                                        <img
+                                        <NextImage
                                             className={
                                                 layerComb?.[idx]?.itmId === 0
                                                     ? 'ml-1 mr-1 mt-1 inline-block cursor-default rounded-xl border border-solid border-[#f0e982] object-contain'
@@ -309,7 +290,7 @@ export default function AmachiromakerClient({
                                         />
                                     )}
                                     {i.items.map((item) => (
-                                        <img
+                                        <NextImage
                                             key={item.itmId}
                                             className={
                                                 layerComb?.[idx]?.itmId ===
