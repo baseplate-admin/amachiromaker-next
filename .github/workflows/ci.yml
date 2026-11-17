@@ -11,6 +11,9 @@ permissions:
     pages: write
     id-token: write
 
+env:
+    NEXT_TELEMETRY_DISABLED: "1"
+
 # No workflow-level concurrency: every push/PR run is allowed to finish instead
 # of a newer run cancelling an older one. GitHub concurrency groups keep only
 # one running and one pending run, so any queued group would still cancel
