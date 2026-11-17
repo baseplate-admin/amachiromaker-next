@@ -11,10 +11,11 @@ permissions:
     pages: write
     id-token: write
 
-concurrency:
-    group: ${{ github.workflow }}-${{ github.ref }}
-    cancel-in-progress: ${{ github.event_name == 'pull_request' }}
-
+# No workflow-level concurrency: every push/PR run is allowed to finish instead
+# of a newer run cancelling an older one. GitHub concurrency groups keep only
+# one running and one pending run, so any queued group would still cancel
+# previously pending runs. The deploy job has its own group because GitHub
+# Pages can only publish one deployment at a time.
 jobs:
     build:
         runs-on: ubuntu-latest
@@ -47,6 +48,9 @@ jobs:
         if: github.ref == 'refs/heads/main'
         needs: build
         runs-on: ubuntu-latest
+        concurrency:
+            group: github-pages-deploy
+            cancel-in-progress: false
         environment:
             name: github-pages
             url: ${{ steps.deployment.outputs.page_url }}

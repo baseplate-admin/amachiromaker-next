@@ -3,7 +3,6 @@
 import type { Psd, Layer as PsdLayer } from "ag-psd";
 import { saveAs } from "file-saver";
 import mergeImages from "merge-images";
-import NextImage from "next/image";
 import { useEffect, useMemo, useState } from "react";
 import { Tab, TabList, TabPanel, Tabs } from "react-tabs";
 import { useWindowDimensions } from "../hooks";
@@ -25,24 +24,27 @@ export default function AmachiromakerClient({
         () => asLayers(initialOrderedLayers),
         [initialOrderedLayers],
     );
-    const [outputImage, setOutputImage] = useState<string | undefined>();
+    const [outputImage, setOutputImage] = useState<string>();
     const { width, height } = useWindowDimensions();
 
     const outputImageDimension = useMemo(() => {
         const maxWidth = 600;
         const minWidth = 300;
         const calculatedWidth = width > height ? width * 0.3 : width * 0.5;
-        return Math.max(minWidth, Math.min(maxWidth, calculatedWidth));
+        const finalWidth = Math.min(maxWidth, calculatedWidth);
+        return Math.max(minWidth, finalWidth);
     }, [width, height]);
 
     const itemImageDimension = useMemo(() => {
+        const maxWidth = 160;
         const calculatedWidth = width > height ? width * 0.1 : width * 0.167;
-        return Math.min(160, calculatedWidth);
+        return Math.min(maxWidth, calculatedWidth);
     }, [width, height]);
 
     const colorImageDimension = useMemo(() => {
+        const maxWidth = 60;
         const calculatedWidth = width > height ? width * 0.05 : width * 0.083;
-        return Math.min(60, calculatedWidth);
+        return Math.min(maxWidth, calculatedWidth);
     }, [width, height]);
 
     const tabImageDimension = colorImageDimension;
@@ -177,37 +179,32 @@ export default function AmachiromakerClient({
         reader.readAsText(file);
     };
 
-    const isOutputReady =
-        typeof outputImage === "string" &&
-        outputImage.startsWith("data:image/png;base64,");
-
     return (
         <div
-            className="flex min-h-screen min-w-screen items-start bg-[#282c34] text-white"
+            className="App"
             style={{ flexDirection: width > height ? "row" : "column" }}
         >
-            <div className="m-2 flex flex-col items-center text-center">
-                {isOutputReady && outputImage ? (
+            <div className="left-area">
+                {outputImage?.startsWith("data:image/png;base64,") ? (
                     <>
-                        <NextImage
-                            className="rounded-2xl border border-solid border-[#555]"
+                        <img
+                            className="layer-image"
                             width={outputImageDimension}
-                            height={outputImageDimension}
                             src={outputImage}
                             title="Output Image"
                             alt="Output"
                         />
-                        <div className="flex flex-row">
+                        <div className="button-group">
                             <button
                                 type="button"
-                                className="mt-4 max-w-fit cursor-pointer rounded-lg border-0 px-4 py-2.5 text-sm font-medium text-white transition-colors duration-200 select-none bg-[#A1586D] hover:bg-[#FCA4CE]"
+                                className="button-1"
                                 onClick={handleReset}
                             >
                                 Reset
                             </button>
                             <button
                                 type="button"
-                                className="ml-4 max-w-fit cursor-pointer rounded-lg border-0 px-4 py-2.5 text-sm font-medium text-white transition-colors duration-200 select-none bg-[#FC7C73] hover:bg-[#FEC8A9]"
+                                className="button-2"
                                 onClick={() => {
                                     saveAs(
                                         outputImage || "",
@@ -219,13 +216,13 @@ export default function AmachiromakerClient({
                             </button>
                             <button
                                 type="button"
-                                className="ml-4 max-w-fit cursor-pointer rounded-lg border-0 px-4 py-2.5 text-sm font-medium text-white transition-colors duration-200 select-none bg-[#FC7C73] hover:bg-[#FEC8A9]"
+                                className="button-2"
                                 onClick={handleDownloadPsd}
                             >
                                 Save PSD
                             </button>
                         </div>
-                        <div className="flex flex-row">
+                        <div className="button-group">
                             <input
                                 id="presetInput"
                                 type="file"
@@ -234,7 +231,7 @@ export default function AmachiromakerClient({
                             />
                             <button
                                 type="button"
-                                className="ml-4 max-w-fit cursor-pointer rounded-lg border-0 px-4 py-2.5 text-sm font-medium text-white transition-colors duration-200 select-none bg-[#DD9785] hover:bg-[#DFC8AB]"
+                                className="button-3"
                                 onClick={() => {
                                     document
                                         .getElementById("presetInput")
@@ -245,7 +242,7 @@ export default function AmachiromakerClient({
                             </button>
                             <button
                                 type="button"
-                                className="ml-4 max-w-fit cursor-pointer rounded-lg border-0 px-4 py-2.5 text-sm font-medium text-white transition-colors duration-200 select-none bg-[#FC7C73] hover:bg-[#FEC8A9]"
+                                className="button-2"
                                 onClick={handleDownloadPreset}
                             >
                                 Download Preset
@@ -254,10 +251,10 @@ export default function AmachiromakerClient({
                     </>
                 ) : (
                     <div
-                        className="flex flex-col items-center justify-center rounded-2xl border border-solid border-[#555] text-gray-400"
+                        className="loading-text-container"
                         style={{
-                            width: outputImageDimension || 300,
-                            height: outputImageDimension || 300,
+                            width: outputImageDimension,
+                            height: outputImageDimension,
                         }}
                     >
                         loading...
@@ -265,15 +262,14 @@ export default function AmachiromakerClient({
                 )}
             </div>
 
-            <div className="config-area m-4 h-full w-full">
+            <div className="config-area">
                 <Tabs>
                     <TabList>
                         {orderedLayers?.map((i) => (
                             <Tab key={i.pId}>
-                                <NextImage
-                                    className="rounded-lg"
+                                <img
+                                    className="tab-image"
                                     width={tabImageDimension}
-                                    height={tabImageDimension}
                                     src={assetPath(i.thumbUrl)}
                                     alt=""
                                 />
@@ -282,14 +278,14 @@ export default function AmachiromakerClient({
                     </TabList>
                     {orderedLayers?.map((i, idx) => (
                         <TabPanel key={i.pId}>
-                            <div className="flex flex-col items-start text-left">
-                                <div className="min-w-full rounded-2xl border border-dashed border-[rgb(114,57,57)]">
+                            <div className="tab-content">
+                                <div className="item-container">
                                     {!!i.isRmv && (
-                                        <NextImage
+                                        <img
                                             className={
                                                 layerComb?.[idx]?.itmId === 0
-                                                    ? "ml-1 mr-1 mt-1 inline-block cursor-default rounded-xl border border-solid border-[#f0e982] object-contain"
-                                                    : "ml-1 mr-1 mt-1 inline-block cursor-pointer rounded-xl border border-dashed border-[rgb(62,62,143)] object-contain transition-all duration-200 hover:border-solid hover:border-[#F082AC]"
+                                                    ? "item-image-selected"
+                                                    : "item-image"
                                             }
                                             onClick={() => {
                                                 handleChangeItem(idx, 0, 0, "");
@@ -301,13 +297,13 @@ export default function AmachiromakerClient({
                                         />
                                     )}
                                     {i.items.map((item) => (
-                                        <NextImage
+                                        <img
                                             key={item.itmId}
                                             className={
                                                 layerComb?.[idx]?.itmId ===
                                                 item.itmId
-                                                    ? "ml-1 mr-1 mt-1 inline-block cursor-default rounded-xl border border-solid border-[#f0e982] object-contain"
-                                                    : "ml-1 mr-1 mt-1 inline-block cursor-pointer rounded-xl border border-dashed border-[rgb(62,62,143)] object-contain transition-all duration-200 hover:border-solid hover:border-[#F082AC]"
+                                                    ? "item-image-selected"
+                                                    : "item-image"
                                             }
                                             src={assetPath(item.thumbUrl)}
                                             width={itemImageDimension}
@@ -333,11 +329,11 @@ export default function AmachiromakerClient({
                                         />
                                     ))}
                                 </div>
-                                {!(
+                                {!!(
                                     Object.keys(i.colors).length > 1 &&
                                     layerComb?.[idx]?.itmId
-                                ) ? null : (
-                                    <div className="mt-1 min-w-full rounded-2xl border border-dashed border-[rgb(44,90,44)]">
+                                ) && (
+                                    <div className="color-container">
                                         {i.items
                                             .find(
                                                 (j) =>
@@ -345,15 +341,13 @@ export default function AmachiromakerClient({
                                                     layerComb?.[idx]?.itmId,
                                             )
                                             ?.originals.map((orig) => (
-                                                <button
+                                                <div
                                                     key={orig.cId}
-                                                    type="button"
                                                     className={
-                                                        (layerComb?.[idx]
+                                                        layerComb?.[idx]
                                                             ?.cId === orig.cId
-                                                            ? "ml-1 mr-1 mt-1.5 inline-block cursor-default rounded-full border-4 border-solid border-white object-contain"
-                                                            : "ml-1 mr-1 mt-1.5 inline-block cursor-pointer rounded-full border-4 border-solid border-gray-500 object-contain transition-all duration-200 hover:border-[#F082AC]") +
-                                                        " bg-transparent p-0"
+                                                            ? "color-image-selected"
+                                                            : "color-image"
                                                     }
                                                     style={{
                                                         background:
