@@ -7,6 +7,7 @@ import NextImage from "next/image";
 import { useEffect, useMemo, useState } from "react";
 import { Tab, TabList, TabPanel, Tabs } from "react-tabs";
 import { useWindowDimensions } from "../hooks";
+import { assetPath } from "../lib/basePath";
 import { asLayerImages, asLayers, getDefaultCombination } from "../lib/data";
 import type { LayerImage } from "../types";
 
@@ -89,7 +90,7 @@ export default function AmachiromakerClient({
             layerComb
                 ?.filter((i) => i.url)
                 .map((i) => ({
-                    src: `${i.url}`,
+                    src: assetPath(i.url),
                     x: i.x,
                     y: i.y,
                 })) || [];
@@ -125,7 +126,10 @@ export default function AmachiromakerClient({
                     };
 
                     const canvas2 = new OffscreenCanvas(600, 600);
-                    await drawImg(canvas2.getContext("2d"), layer.url);
+                    await drawImg(
+                        canvas2.getContext("2d"),
+                        assetPath(layer.url),
+                    );
 
                     return {
                         top: layer.y,
@@ -270,7 +274,7 @@ export default function AmachiromakerClient({
                                     className="rounded-lg"
                                     width={tabImageDimension}
                                     height={tabImageDimension}
-                                    src={`${i.thumbUrl}`}
+                                    src={assetPath(i.thumbUrl)}
                                     alt=""
                                 />
                             </Tab>
@@ -292,7 +296,7 @@ export default function AmachiromakerClient({
                                             }}
                                             width={itemImageDimension}
                                             height={itemImageDimension}
-                                            src="/emptyset.svg"
+                                            src={assetPath("/emptyset.svg")}
                                             alt=""
                                         />
                                     )}
@@ -305,7 +309,7 @@ export default function AmachiromakerClient({
                                                     ? "ml-1 mr-1 mt-1 inline-block cursor-default rounded-xl border border-solid border-[#f0e982] object-contain"
                                                     : "ml-1 mr-1 mt-1 inline-block cursor-pointer rounded-xl border border-dashed border-[rgb(62,62,143)] object-contain transition-all duration-200 hover:border-solid hover:border-[#F082AC]"
                                             }
-                                            src={`${item.thumbUrl}`}
+                                            src={assetPath(item.thumbUrl)}
                                             width={itemImageDimension}
                                             height={itemImageDimension}
                                             onClick={() => {
