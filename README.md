@@ -4,8 +4,6 @@ A Next.js port of amachiromaker — a browser-based character maker that composi
 
 The goal of this port is **exact visual and behavioural parity** with the original React app: same layout, sizing, fonts, borders, assets, presets, and export output.
 
-![amachiromaker-next preview](./amachiromaker-next-preview.png)
-
 ## Features
 
 - **Layered character composition** — 25 layers (background, hair, face, eyes, clothes, …) rendered with `merge-images`.
@@ -75,7 +73,7 @@ src/
   types.ts                 Layer and LayerImage types
   vendor.d.ts              Type declarations for merge-images and file-saver
 public/
-  app/image_maker/...      Layer, item and thumbnail PNGs
+  app/image_maker/...      Layer, item and thumbnail AVIF images
   emptyset.svg             "Remove item" placeholder
   favicon.png, manifest.json, robots.txt
 ```
@@ -85,7 +83,8 @@ public/
 - Markup and class names mirror the upstream `App.tsx` / `App.css`.
 - Tailwind is imported with only `theme` and `utilities` (no Preflight) because Preflight's global `box-sizing`, `img { max-width: 100% }`, and `button { font: inherit }` rules change the original layout.
 - Layer/item/thumbnail images live under `public/app/...` and are resolved through `assetPath()`, so they work at the root or under a configured base path.
-- Data is bundled from the upstream `public/defaultCombination.json` and `public/orderedLayers.json` (contents are identical).
+- All 1,111 app assets are lossless AVIF, converted pixel-identically from the original PNGs (about 46% smaller). `defaultCombination.json` and `orderedLayers.json` reference the `.avif` files.
+- Data is bundled from the upstream `defaultCombination.json` and `orderedLayers.json` (contents are identical apart from the asset extensions).
 
 ## Credits
 
