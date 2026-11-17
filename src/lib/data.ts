@@ -1,6 +1,6 @@
-import type { Layer, LayerImage } from '../types';
-import defaultCombination from './defaultCombination.json';
-import orderedLayers from './orderedLayers.json';
+import type { Layer, LayerImage } from "../types";
+import defaultCombination from "./defaultCombination.json";
+import orderedLayers from "./orderedLayers.json";
 
 export function asLayerImages(value: unknown): LayerImage[] {
     return Array.isArray(value) ? (value as LayerImage[]) : [];

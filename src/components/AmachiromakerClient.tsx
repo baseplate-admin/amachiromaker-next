@@ -1,14 +1,14 @@
-'use client';
+"use client";
 
-import NextImage from 'next/image';
-import { useEffect, useMemo, useState } from 'react';
-import { Tab, Tabs, TabList, TabPanel } from 'react-tabs';
-import mergeImages from 'merge-images';
-import type { Layer as PsdLayer, Psd } from 'ag-psd';
-import { saveAs } from 'file-saver';
-import { useWindowDimensions } from '../hooks';
-import type { LayerImage } from '../types';
-import { asLayerImages, asLayers, getDefaultCombination } from '../lib/data';
+import type { Psd, Layer as PsdLayer } from "ag-psd";
+import { saveAs } from "file-saver";
+import mergeImages from "merge-images";
+import NextImage from "next/image";
+import { useEffect, useMemo, useState } from "react";
+import { Tab, TabList, TabPanel, Tabs } from "react-tabs";
+import { useWindowDimensions } from "../hooks";
+import { asLayerImages, asLayers, getDefaultCombination } from "../lib/data";
+import type { LayerImage } from "../types";
 
 export default function AmachiromakerClient({
     initialLayerComb,
@@ -48,12 +48,14 @@ export default function AmachiromakerClient({
 
     useEffect(() => {
         const savedComb = JSON.parse(
-            localStorage.getItem('layerComb') || 'null',
+            localStorage.getItem("layerComb") || "null",
         );
 
         // Restore the persisted combination after hydration.
         // eslint-disable-next-line react-hooks/set-state-in-effect
-        setLayerComb(savedComb ? asLayerImages(savedComb) : getDefaultCombination());
+        setLayerComb(
+            savedComb ? asLayerImages(savedComb) : getDefaultCombination(),
+        );
     }, []);
 
     const handleChangeItem = (
@@ -71,7 +73,7 @@ export default function AmachiromakerClient({
             url: url as string,
         };
 
-        localStorage.setItem('layerComb', JSON.stringify(layerComb_));
+        localStorage.setItem("layerComb", JSON.stringify(layerComb_));
 
         setLayerComb(layerComb_);
     };
@@ -79,7 +81,7 @@ export default function AmachiromakerClient({
     const handleReset = () => {
         const res = getDefaultCombination();
         setLayerComb(res);
-        localStorage.setItem('layerComb', JSON.stringify(res));
+        localStorage.setItem("layerComb", JSON.stringify(res));
     };
 
     useEffect(() => {
@@ -98,7 +100,7 @@ export default function AmachiromakerClient({
     }, [layerComb]);
 
     const handleDownloadPsd = async () => {
-        const agPsd = await import('ag-psd');
+        const agPsd = await import("ag-psd");
 
         const psdLayers = await Promise.all(
             (layerComb || [])
@@ -114,7 +116,7 @@ export default function AmachiromakerClient({
                     ) => {
                         return new Promise<void>((resolve) => {
                             const image = new Image();
-                            image.onload = function () {
+                            image.onload = () => {
                                 ctx?.drawImage(image, 0, 0);
                                 resolve();
                             };
@@ -123,12 +125,12 @@ export default function AmachiromakerClient({
                     };
 
                     const canvas2 = new OffscreenCanvas(600, 600);
-                    await drawImg(canvas2.getContext('2d'), layer.url);
+                    await drawImg(canvas2.getContext("2d"), layer.url);
 
                     return {
                         top: layer.y,
                         left: layer.x,
-                        blendMode: 'normal',
+                        blendMode: "normal",
                         opacity: 1,
                         name: layer.name,
                         canvas: canvas2 as unknown as HTMLCanvasElement,
@@ -153,7 +155,7 @@ export default function AmachiromakerClient({
     const handleDownloadPreset = () => {
         const presetJson = JSON.stringify(layerComb);
         const presetBlob = new Blob([presetJson], {
-            type: 'text/plain',
+            type: "text/plain",
         });
         saveAs(presetBlob, `amachiromaker-preset-${Date.now()}.json`);
     };
@@ -164,21 +166,21 @@ export default function AmachiromakerClient({
         const reader = new FileReader();
         reader.onload = () => {
             const data = JSON.parse(reader.result as string);
-            localStorage.setItem('layerComb', reader.result as string);
+            localStorage.setItem("layerComb", reader.result as string);
             setLayerComb(asLayerImages(data));
-            e.target.value = '';
+            e.target.value = "";
         };
         reader.readAsText(file);
     };
 
     const isOutputReady =
-        typeof outputImage === 'string' &&
-        outputImage.startsWith('data:image/png;base64,');
+        typeof outputImage === "string" &&
+        outputImage.startsWith("data:image/png;base64,");
 
     return (
         <div
             className="flex min-h-screen min-w-screen items-start bg-[#282c34] text-white"
-            style={{ flexDirection: width > height ? 'row' : 'column' }}
+            style={{ flexDirection: width > height ? "row" : "column" }}
         >
             <div className="m-2 flex flex-col items-center text-center">
                 {isOutputReady && outputImage ? (
@@ -193,16 +195,18 @@ export default function AmachiromakerClient({
                         />
                         <div className="flex flex-row">
                             <button
+                                type="button"
                                 className="mt-4 max-w-fit cursor-pointer rounded-lg border-0 px-4 py-2.5 text-sm font-medium text-white transition-colors duration-200 select-none bg-[#A1586D] hover:bg-[#FCA4CE]"
                                 onClick={handleReset}
                             >
                                 Reset
                             </button>
                             <button
+                                type="button"
                                 className="ml-4 max-w-fit cursor-pointer rounded-lg border-0 px-4 py-2.5 text-sm font-medium text-white transition-colors duration-200 select-none bg-[#FC7C73] hover:bg-[#FEC8A9]"
                                 onClick={() => {
                                     saveAs(
-                                        outputImage || '',
+                                        outputImage || "",
                                         `amachiromaker-output-${Date.now()}.png`,
                                     );
                                 }}
@@ -210,6 +214,7 @@ export default function AmachiromakerClient({
                                 Save PNG
                             </button>
                             <button
+                                type="button"
                                 className="ml-4 max-w-fit cursor-pointer rounded-lg border-0 px-4 py-2.5 text-sm font-medium text-white transition-colors duration-200 select-none bg-[#FC7C73] hover:bg-[#FEC8A9]"
                                 onClick={handleDownloadPsd}
                             >
@@ -220,20 +225,22 @@ export default function AmachiromakerClient({
                             <input
                                 id="presetInput"
                                 type="file"
-                                style={{ display: 'none' }}
+                                style={{ display: "none" }}
                                 onChange={handleLoadPreset}
                             />
                             <button
+                                type="button"
                                 className="ml-4 max-w-fit cursor-pointer rounded-lg border-0 px-4 py-2.5 text-sm font-medium text-white transition-colors duration-200 select-none bg-[#DD9785] hover:bg-[#DFC8AB]"
                                 onClick={() => {
                                     document
-                                        .getElementById('presetInput')
+                                        .getElementById("presetInput")
                                         ?.click();
                                 }}
                             >
                                 Load Preset
                             </button>
                             <button
+                                type="button"
                                 className="ml-4 max-w-fit cursor-pointer rounded-lg border-0 px-4 py-2.5 text-sm font-medium text-white transition-colors duration-200 select-none bg-[#FC7C73] hover:bg-[#FEC8A9]"
                                 onClick={handleDownloadPreset}
                             >
@@ -277,11 +284,11 @@ export default function AmachiromakerClient({
                                         <NextImage
                                             className={
                                                 layerComb?.[idx]?.itmId === 0
-                                                    ? 'ml-1 mr-1 mt-1 inline-block cursor-default rounded-xl border border-solid border-[#f0e982] object-contain'
-                                                    : 'ml-1 mr-1 mt-1 inline-block cursor-pointer rounded-xl border border-dashed border-[rgb(62,62,143)] object-contain transition-all duration-200 hover:border-solid hover:border-[#F082AC]'
+                                                    ? "ml-1 mr-1 mt-1 inline-block cursor-default rounded-xl border border-solid border-[#f0e982] object-contain"
+                                                    : "ml-1 mr-1 mt-1 inline-block cursor-pointer rounded-xl border border-dashed border-[rgb(62,62,143)] object-contain transition-all duration-200 hover:border-solid hover:border-[#F082AC]"
                                             }
                                             onClick={() => {
-                                                handleChangeItem(idx, 0, 0, '');
+                                                handleChangeItem(idx, 0, 0, "");
                                             }}
                                             width={itemImageDimension}
                                             height={itemImageDimension}
@@ -295,8 +302,8 @@ export default function AmachiromakerClient({
                                             className={
                                                 layerComb?.[idx]?.itmId ===
                                                 item.itmId
-                                                    ? 'ml-1 mr-1 mt-1 inline-block cursor-default rounded-xl border border-solid border-[#f0e982] object-contain'
-                                                    : 'ml-1 mr-1 mt-1 inline-block cursor-pointer rounded-xl border border-dashed border-[rgb(62,62,143)] object-contain transition-all duration-200 hover:border-solid hover:border-[#F082AC]'
+                                                    ? "ml-1 mr-1 mt-1 inline-block cursor-default rounded-xl border border-solid border-[#f0e982] object-contain"
+                                                    : "ml-1 mr-1 mt-1 inline-block cursor-pointer rounded-xl border border-dashed border-[rgb(62,62,143)] object-contain transition-all duration-200 hover:border-solid hover:border-[#F082AC]"
                                             }
                                             src={`${item.thumbUrl}`}
                                             width={itemImageDimension}
@@ -334,13 +341,15 @@ export default function AmachiromakerClient({
                                                     layerComb?.[idx]?.itmId,
                                             )
                                             ?.originals.map((orig) => (
-                                                <div
+                                                <button
                                                     key={orig.cId}
+                                                    type="button"
                                                     className={
-                                                        layerComb?.[idx]
+                                                        (layerComb?.[idx]
                                                             ?.cId === orig.cId
-                                                            ? 'ml-1 mr-1 mt-1.5 inline-block cursor-default rounded-full border-4 border-solid border-white object-contain'
-                                                            : 'ml-1 mr-1 mt-1.5 inline-block cursor-pointer rounded-full border-4 border-solid border-gray-500 object-contain transition-all duration-200 hover:border-[#F082AC]'
+                                                            ? "ml-1 mr-1 mt-1.5 inline-block cursor-default rounded-full border-4 border-solid border-white object-contain"
+                                                            : "ml-1 mr-1 mt-1.5 inline-block cursor-pointer rounded-full border-4 border-solid border-gray-500 object-contain transition-all duration-200 hover:border-[#F082AC]") +
+                                                        " bg-transparent p-0"
                                                     }
                                                     style={{
                                                         background:
