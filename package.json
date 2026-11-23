@@ -11,7 +11,7 @@
         "typecheck": "tsc --noEmit"
     },
     "dependencies": {
-        "ag-psd": "^34.2.0",
+        "ag-psd": "^34.2.2",
         "file-saver": "^2.0.5",
         "merge-images": "^2.0.0",
         "next": "16.4.6",
